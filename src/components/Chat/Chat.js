@@ -5,7 +5,7 @@ import { AttachFile, MoreVert, SearchOutlined } from "@material-ui/icons";
 import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import MicIcon from "@material-ui/icons/Mic";
 import firebase, { firestore } from "../../firebase/firebase";
-
+import DeleteIcon from "@material-ui/icons/Delete";
 export default function Chat() {
   const [chatMsgs, setChatMsgs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +53,18 @@ export default function Chat() {
         chatMsgsBodyRef.current.scrollHeight);
   }, [chatMsgs]);
 
+  const deleteMsg = (id) => {
+    firestore
+      .collection("messages")
+      .doc(id)
+      .get()
+      .then((doc) => {
+        doc.ref.delete();
+        //deleted successfully
+      })
+      .catch((err) => console.error(err));
+  };
+
   return (
     <div className="chat">
       <div className="chat__header">
@@ -76,15 +88,20 @@ export default function Chat() {
 
       <div ref={chatMsgsBodyRef} className="chat__body">
         {chatMsgs.map((chatMsg) => (
-          <p key={chatMsg.id} className="chat__message">
+          <div key={chatMsg.id} className="chat__message">
             <span className="chat__name">Prakhar</span>
             {chatMsg.userMsg}
             <span className="chat__timestamp">
-              {/* {console.log(chatMsg.timestamp)} */}
               {chatMsg.timestamp &&
                 chatMsg.timestamp.toDate().toLocaleTimeString()}
             </span>
-          </p>
+
+            <div className="chat__message-delBtn">
+              <IconButton onClick={() => deleteMsg(chatMsg.id)}>
+                <DeleteIcon />
+              </IconButton>
+            </div>
+          </div>
         ))}
 
         <div className={`chat__body--loading${isLoading ? " showLoader" : ""}`}>
