@@ -11,12 +11,3 @@ body {
   height: 100vh;
   background-color: #dadbd3;
 }
-
-.app__body {
-  display: flex;
-  background-color: #ededed;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  width: 96vw;
-  height: 96vh;
-  box-shadow: -1px 4px 5px -6px rgba(0, 0, 0, 0.75);
-}

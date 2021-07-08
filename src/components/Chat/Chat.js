@@ -6,12 +6,19 @@ import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import MicIcon from "@material-ui/icons/Mic";
 import firebase, { firestore } from "../../firebase/firebase";
 import DeleteIcon from "@material-ui/icons/Delete";
-export default function Chat() {
+import Sidebar from "../Sidebar/Sidebar";
+
+const CURRENT_USER_ID = "EwdWhtNpLeeWlIZ6MHde";
+
+export default function Chat(props) {
   const [chatMsgs, setChatMsgs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentMsgID, setCurrentMsgID] = useState(null);
   const chatMsgsBodyRef = useRef();
 
   useEffect(() => {
+    setCurrentMsgID(props.location.search.split("id=")[1]);
+
     const unsub = firestore
       .collection("messages")
       .orderBy("timestamp", "asc")
@@ -21,7 +28,7 @@ export default function Chat() {
       });
 
     return unsub;
-  }, []);
+  }, [props]);
 
   const saveMsgInDB = (e) => {
     e.preventDefault();
@@ -66,57 +73,65 @@ export default function Chat() {
   };
 
   return (
-    <div className="chat">
-      <div className="chat__header">
-        <Avatar />
-        <div className="chat__headerInfo">
-          <h3>Room name</h3>
-          <p>last seen at .....</p>
-        </div>
-        <div className="chat__headerRight">
-          <IconButton>
-            <SearchOutlined />
-          </IconButton>
-          <IconButton>
-            <AttachFile />
-          </IconButton>
-          <IconButton>
-            <MoreVert />
-          </IconButton>
-        </div>
-      </div>
+    <div className="chat__container">
+      <Sidebar />
 
-      <div ref={chatMsgsBodyRef} className="chat__body">
-        {chatMsgs.map((chatMsg) => (
-          <div key={chatMsg.id} className="chat__message">
-            <span className="chat__name">Prakhar</span>
-            {chatMsg.userMsg}
-            <span className="chat__timestamp">
-              {chatMsg.timestamp &&
-                chatMsg.timestamp.toDate().toLocaleTimeString()}
-            </span>
-
-            <div className="chat__message-delBtn">
-              <IconButton onClick={() => deleteMsg(chatMsg.id)}>
-                <DeleteIcon />
+      {currentMsgID && (
+        <div className="chat">
+          <div className="chat__header">
+            <Avatar />
+            <div className="chat__headerInfo">
+              <h3>Room name</h3>
+              <p>last seen at .....</p>
+            </div>
+            <div className="chat__headerRight">
+              <IconButton>
+                <SearchOutlined />
+              </IconButton>
+              <IconButton>
+                <AttachFile />
+              </IconButton>
+              <IconButton>
+                <MoreVert />
               </IconButton>
             </div>
           </div>
-        ))}
 
-        <div className={`chat__body--loading${isLoading ? " showLoader" : ""}`}>
-          Loading Chat Msgs
+          <div ref={chatMsgsBodyRef} className="chat__body">
+            {chatMsgs.map((chatMsg) => (
+              <div key={chatMsg.id} className="chat__message">
+                <span className="chat__name">Prakhar</span>
+                {chatMsg.userMsg}
+                <span className="chat__timestamp">
+                  {chatMsg.timestamp &&
+                    chatMsg.timestamp.toDate().toLocaleTimeString()}
+                </span>
+
+                <div className="chat__message-delBtn">
+                  <IconButton onClick={() => deleteMsg(chatMsg.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
+              </div>
+            ))}
+
+            <div
+              className={`chat__body--loading${isLoading ? " showLoader" : ""}`}
+            >
+              Loading Chat Msgs
+            </div>
+          </div>
+
+          <div className="chat__footer">
+            <InsertEmoticonIcon />
+            <form onSubmit={saveMsgInDB}>
+              <input placeholder="Type a message...." type="text" name="msg" />
+              <button type="submit">Send a message</button>
+            </form>
+            <MicIcon />
+          </div>
         </div>
-      </div>
-
-      <div className="chat__footer">
-        <InsertEmoticonIcon />
-        <form onSubmit={saveMsgInDB}>
-          <input placeholder="Type a message...." type="text" name="msg" />
-          <button type="submit">Send a message</button>
-        </form>
-        <MicIcon />
-      </div>
+      )}
     </div>
   );
 }
