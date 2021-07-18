@@ -16,11 +16,15 @@ export default function Chat(props) {
   const [currentMsgID, setCurrentMsgID] = useState(null);
   const chatMsgsBodyRef = useRef();
 
+  const convoID = `${CURRENT_USER_ID}:${currentMsgID}`;
+
   useEffect(() => {
     setCurrentMsgID(props.location.search.split("id=")[1]);
 
     const unsub = firestore
       .collection("messages")
+      .doc(convoID)
+      .collection(convoID)
       .orderBy("timestamp", "asc")
       .onSnapshot((d) => {
         setChatMsgs(d.docs.map((msg) => ({ id: msg.id, ...msg.data() })));
@@ -39,6 +43,8 @@ export default function Chat(props) {
 
     firestore
       .collection("messages")
+      .doc(convoID)
+      .collection(convoID)
       .doc()
       .set({
         userMsg,
@@ -46,8 +52,18 @@ export default function Chat(props) {
       })
       .then(() => {
         // Msg saved
-
-        console.log();
+        firestore
+          .collection("messages")
+          .doc(convoID)
+          .get()
+          .then((d) => {
+            d.ref.set({
+              lastMessage: {
+                userMsg,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+            });
+          });
       })
       .catch((err) => console.error(err));
 

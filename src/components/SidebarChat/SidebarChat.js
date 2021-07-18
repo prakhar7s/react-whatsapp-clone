@@ -22,7 +22,6 @@ export default function SidebarChat() {
 
   return (
     <div className="sidebar__chats">
-      {console.log(CURRENT_USER_ID)}
       {conversations.map(
         ({ id, username }) =>
           CURRENT_USER_ID !== id && (
